@@ -269,7 +269,7 @@ export function PlayerScreen() {
         </motion.div>
 
         {/* Course progress */}
-        <div className="mt-4 rounded-2xl border border-border/70 bg-card/60 p-3.5 shadow-card">
+        <div className="mt-4 rounded-2xl border border-primary/15 bg-gradient-to-br from-primary/[0.07] to-card p-3.5 shadow-card ring-1 ring-primary/10">
           <div className="mb-1.5 flex items-center justify-between">
             <span className="text-xs font-semibold text-muted-foreground">
               {t('courseProgress')}

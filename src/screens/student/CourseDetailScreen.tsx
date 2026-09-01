@@ -3,9 +3,11 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { motion } from 'motion/react';
 import {
+  Award,
   Check,
   ChevronRight,
   Compass,
+  Infinity,
   ListVideo,
   RefreshCw,
   ShoppingCart,
@@ -35,6 +37,9 @@ const strings = {
   statPreview: { en: 'Free preview', ar: 'معاينة مجانية' },
   statLearners: { en: 'Learners', ar: 'المتعلمون' },
   about: { en: 'About this course', ar: 'عن هذه الدورة' },
+  lifetime: { en: 'Lifetime access', ar: 'وصول مدى الحياة' },
+  certificate: { en: 'Certificate', ar: 'شهادة إتمام' },
+  lessonsChip: { en: '{n} lessons', ar: '{n} درسًا' },
   readMore: { en: 'Read more', ar: 'اقرأ المزيد' },
   readLess: { en: 'Show less', ar: 'عرض أقل' },
   addToCart: { en: 'Add to cart', ar: 'أضف إلى السلة' },
@@ -191,7 +196,13 @@ export function CourseDetailScreen() {
 
   /* ---- Loaded ---- */
   const title = localized(c, 'title', locale);
-  const description = localized(c, 'description', locale);
+  const description = localized(c, 'description', locale)
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&#39;|&rsquo;/g, '’')
+    .replace(/&quot;/g, '"');
   const off = discountPct(c.priceCents, c.compareAtPriceCents);
   const isFree = c.priceCents === 0;
   const inCart = has(c.courseId);
@@ -262,33 +273,45 @@ export function CourseDetailScreen() {
             )}
           </motion.div>
 
-          {/* Price block */}
+          {/* Price block — price + the value it unlocks (chips) so the card
+              carries weight instead of framing a lone number. */}
           <motion.div
             variants={section}
-            className="flex items-center gap-3 rounded-2xl border border-border/70 bg-card p-4 shadow-card"
+            className="rounded-2xl border border-border/70 bg-card p-4 shadow-card"
           >
-            <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-2">
-                <span
-                  className={cn(
-                    'font-heading text-3xl font-extrabold',
-                    isFree ? 'text-success' : 'text-money',
-                  )}
-                >
-                  {money(c.priceCents, c.currency, t('free'))}
-                </span>
-                {off > 0 && (
-                  <span className="text-base text-muted-foreground line-through">
-                    {money(c.compareAtPriceCents!, c.currency)}
-                  </span>
+            <div className="flex items-baseline gap-2">
+              <span
+                className={cn(
+                  'font-heading text-3xl font-extrabold',
+                  isFree ? 'text-success' : 'text-money',
                 )}
-              </div>
-            </div>
-            {off > 0 && (
-              <span className="shrink-0 rounded-full bg-destructive px-3 py-1.5 text-sm font-extrabold text-white">
-                −{off}%
+              >
+                {money(c.priceCents, c.currency, t('free'))}
               </span>
-            )}
+              {off > 0 && (
+                <span className="text-base text-muted-foreground line-through">
+                  {money(c.compareAtPriceCents!, c.currency)}
+                </span>
+              )}
+              {off > 0 && (
+                <span className="ms-auto shrink-0 rounded-full bg-destructive px-3 py-1.5 text-sm font-extrabold text-white">
+                  −{off}%
+                </span>
+              )}
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2 border-t border-border/60 pt-3">
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Infinity className="size-4 text-primary" /> {t('lifetime')}
+              </span>
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                <Award className="size-4 text-primary" /> {t('certificate')}
+              </span>
+              {c.totalLessons > 0 && (
+                <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-muted-foreground">
+                  <ListVideo className="size-4 text-primary" /> {t('lessonsChip', { n: c.totalLessons })}
+                </span>
+              )}
+            </div>
           </motion.div>
 
           {/* Description */}
