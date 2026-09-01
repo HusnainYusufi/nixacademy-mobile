@@ -30,10 +30,15 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 21
+          java-version: 17
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          # Pin the exact modern packages Capacitor needs (compileSdk 34).
+          # The action's default set pulls the obsolete "Android SDK Tools"
+          # package, whose archive is gone → "unknown archive" failure.
+          packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
       - name: Sync Capacitor
         run: npx cap sync android
