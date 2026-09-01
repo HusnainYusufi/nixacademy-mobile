@@ -1,22 +1,17 @@
 import { motion } from 'motion/react';
-import { BookOpen, PlayCircle } from 'lucide-react';
+import { BookOpen } from 'lucide-react';
 import { fileUrl } from '@/lib/api';
 import { discountPct } from '@/lib/format';
-import { localized, useLocale, useT } from '@/lib/i18n';
+import { localized, useLocale } from '@/lib/i18n';
 import type { CourseDetail } from '@/lib/types';
-
-const strings = {
-  trailer: { en: 'Trailer', ar: 'مقطع تعريفي' },
-};
 
 /**
  * Full-bleed course hero: the thumbnail rising behind the status bar with a
- * bottom scrim, the academy kicker + localized title overlaid, and a discount
- * flag. A subtle trailer chip appears when the course ships one.
+ * bottom scrim and the academy kicker + localized title overlaid, plus a
+ * discount flag.
  */
 export function CourseHero({ c }: { c: CourseDetail }) {
   const { locale } = useLocale();
-  const t = useT(strings);
   const title = localized(c, 'title', locale);
   const off = discountPct(c.priceCents, c.compareAtPriceCents);
 
@@ -58,17 +53,9 @@ export function CourseHero({ c }: { c: CourseDetail }) {
         transition={{ duration: 0.5, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
         className="absolute inset-x-0 bottom-0 space-y-2 p-4 pb-5"
       >
-        <div className="flex flex-wrap items-center gap-2">
-          <p className="truncate text-xs font-bold uppercase tracking-wide text-primary">
-            {c.academyName}
-          </p>
-          {c.hasTrailer && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] font-bold text-foreground backdrop-blur-sm">
-              <PlayCircle className="size-3" />
-              {t('trailer')}
-            </span>
-          )}
-        </div>
+        <p className="truncate text-xs font-bold uppercase tracking-wide text-primary">
+          {c.academyName}
+        </p>
         <h1 className="text-2xl font-extrabold leading-tight text-foreground">{title}</h1>
       </motion.div>
     </div>

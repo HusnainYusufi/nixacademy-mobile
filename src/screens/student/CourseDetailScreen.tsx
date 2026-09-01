@@ -256,7 +256,7 @@ export function CourseDetailScreen() {
             {c.salesCount > 0 && (
               <StatPill
                 icon={<Users className="size-4" />}
-                value={c.salesCount.toLocaleString(locale === 'ar' ? 'ar-EG' : 'en-US')}
+                value={c.salesCount.toLocaleString('en-US')}
                 label={t('statLearners')}
               />
             )}

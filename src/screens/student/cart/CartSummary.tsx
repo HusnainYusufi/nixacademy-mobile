@@ -64,16 +64,20 @@ export function CartSummary({
       {/* soft gold wash at the top edge */}
       <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-primary/8 to-transparent" />
       <CardBody className="relative space-y-3 p-4">
-        <div className="flex items-center justify-between text-sm">
-          <span className="text-muted-foreground">{t('subtotal')}</span>
-          {firstLoad ? (
-            <Skeleton className="h-4 w-16" />
-          ) : (
-            <span className="font-semibold tabular-nums text-foreground">
-              {money(subtotalCents, cur)}
-            </span>
-          )}
-        </div>
+        {/* Subtotal only earns a row when there's a discount to contrast it
+            against — otherwise it's identical to the Total below. */}
+        {(firstLoad || discountCents > 0) && (
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-muted-foreground">{t('subtotal')}</span>
+            {firstLoad ? (
+              <Skeleton className="h-4 w-16" />
+            ) : (
+              <span className="font-semibold tabular-nums text-foreground">
+                {money(subtotalCents, cur)}
+              </span>
+            )}
+          </div>
+        )}
 
         {discountCents > 0 && (
           <div className="flex items-center justify-between text-sm">
@@ -136,7 +140,7 @@ export function CartSummary({
         )}
 
         <Button
-          variant="gold"
+          variant={checkoutDisabled ? 'secondary' : 'gold'}
           size="lg"
           className="mt-1 w-full"
           disabled={checkoutDisabled}

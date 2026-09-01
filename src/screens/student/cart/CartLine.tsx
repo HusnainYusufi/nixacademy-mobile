@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
-import { AlertTriangle, BookOpen, ChevronDown, Layers, Trash2 } from 'lucide-react';
+import { AlertTriangle, BookOpen, CheckCircle2, ChevronDown, Layers, Trash2 } from 'lucide-react';
 import { fileUrl } from '@/lib/api';
 import { money } from '@/lib/format';
 import { useT } from '@/lib/i18n';
@@ -120,10 +120,22 @@ export function CartLine({
         </div>
       </div>
 
-      {/* Unavailable warning */}
+      {/* Unavailable notice — owning a course is informational (amber), only a
+          not-for-sale line is a real error (red). */}
       {unavailable && (
-        <div className="flex items-center gap-2 border-t border-destructive/20 bg-destructive/5 px-3 py-2 text-xs font-semibold text-destructive">
-          <AlertTriangle className="size-3.5 shrink-0" />
+        <div
+          className={cn(
+            'flex items-center gap-2 border-t px-3 py-2 text-xs font-semibold',
+            unavailable === 'ALREADY_OWNED'
+              ? 'border-warning/25 bg-warning/10 text-warning'
+              : 'border-destructive/20 bg-destructive/5 text-destructive',
+          )}
+        >
+          {unavailable === 'ALREADY_OWNED' ? (
+            <CheckCircle2 className="size-3.5 shrink-0" />
+          ) : (
+            <AlertTriangle className="size-3.5 shrink-0" />
+          )}
           <span>{unavailable === 'ALREADY_OWNED' ? t('alreadyOwned') : t('notForSale')}</span>
         </div>
       )}

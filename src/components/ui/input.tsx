@@ -21,7 +21,10 @@ export const Input = forwardRef<HTMLInputElement, FieldProps>(function Input(
           {label}
         </label>
       )}
-      <div className="relative">
+      {/* Wrapper inherits the input's dir so the icon span (inset-inline-start)
+          and the input's padding (padding-inline-start) resolve on the SAME
+          side — otherwise a dir="ltr" field inside an RTL screen splits them. */}
+      <div className="relative" dir={props.dir}>
         {leading && (
           <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center text-muted-foreground">
             {leading}
