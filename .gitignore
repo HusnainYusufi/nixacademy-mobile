@@ -1,0 +1,23 @@
+# deps
+node_modules
+# build
+dist
+dist-ssr
+*.local
+# capacitor / android
+android/app/build
+android/build
+android/.gradle
+android/captures
+android/local.properties
+android/app/src/main/assets/public
+android/app/release
+*.keystore
+!debug.keystore
+# editor / os
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+*.log
+.env
+.env.local
