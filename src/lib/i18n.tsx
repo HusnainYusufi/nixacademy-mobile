@@ -101,12 +101,9 @@ export function pick(msg: Msg, locale: Locale) {
 
 /** Localized field helper for API rows carrying `titleI18n` / `descriptionI18n`
  *  maps ({ en, ar }) with a base fallback. */
-export function localized<T extends Record<string, unknown>>(
-  row: T,
-  field: string,
-  locale: Locale,
-): string {
-  const i18n = row[`${field}I18n`] as Record<string, string> | undefined;
+export function localized(row: object, field: string, locale: Locale): string {
+  const r = row as Record<string, unknown>;
+  const i18n = r[`${field}I18n`] as Record<string, string> | undefined;
   const val = i18n?.[locale] || i18n?.en || i18n?.ar;
-  return (val || (row[field] as string) || '') as string;
+  return (val || (r[field] as string) || '') as string;
 }
