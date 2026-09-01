@@ -1,7 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { AtSign, Eye, EyeOff, Lock, Building2, Languages, ArrowLeft } from 'lucide-react';
+import { AtSign, Eye, EyeOff, Lock, Languages, ArrowLeft } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useLocale, useT } from '@/lib/i18n';
 import { ApiError } from '@/lib/api';
@@ -13,26 +13,26 @@ import { cn } from '@/lib/utils';
 const strings = {
   welcome: { en: 'Welcome back', ar: 'مرحبًا بعودتك' },
   sub: { en: 'Sign in to keep learning.', ar: 'سجّل الدخول لمواصلة التعلّم.' },
-  workspace: { en: 'Workspace', ar: 'مساحة العمل' },
-  workspacePh: { en: 'nix-academy', ar: 'nix-academy' },
   email: { en: 'Email', ar: 'البريد الإلكتروني' },
   emailPh: { en: 'you@example.com', ar: 'you@example.com' },
   password: { en: 'Password', ar: 'كلمة المرور' },
   passwordPh: { en: 'Your password', ar: 'كلمة المرور' },
   signIn: { en: 'Sign in', ar: 'تسجيل الدخول' },
-  bad: { en: 'Check your workspace, email and password.', ar: 'تحقّق من مساحة العمل والبريد وكلمة المرور.' },
-  notFound: { en: "That workspace doesn't exist.", ar: 'مساحة العمل هذه غير موجودة.' },
+  bad: { en: 'The email or password is incorrect.', ar: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.' },
+  multi: {
+    en: 'This email is linked to more than one academy. Please contact support.',
+    ar: 'هذا البريد مرتبط بأكثر من أكاديمية. يرجى التواصل مع الدعم.',
+  },
   tagline: { en: 'Learn. Prove it. Grow.', ar: 'تعلّم. أثبت. انطلق.' },
 };
 
 export function LoginScreen() {
   const t = useT(strings);
   const { toggle, locale } = useLocale();
-  const { login, lastSlug } = useAuth();
+  const { login, lastEmail } = useAuth();
   const navigate = useNavigate();
 
-  const [slug, setSlug] = useState(lastSlug ?? 'nix-academy');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(lastEmail ?? '');
   const [password, setPassword] = useState('');
   const [show, setShow] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -44,10 +44,10 @@ export function LoginScreen() {
     setError(null);
     setBusy(true);
     try {
-      await login(slug, email, password);
+      await login(email, password);
       navigate('/app/explore', { replace: true });
     } catch (err) {
-      if (err instanceof ApiError && err.status === 404) setError(t('notFound'));
+      if (err instanceof ApiError && err.code === 'MULTIPLE_ACADEMIES') setError(t('multi'));
       else setError(t('bad'));
       setBusy(false);
     }
@@ -101,17 +101,6 @@ export function LoginScreen() {
             <p className="text-sm text-muted-foreground">{t('sub')}</p>
           </div>
 
-          <Input
-            label={t('workspace')}
-            name="workspace"
-            autoCapitalize="none"
-            autoCorrect="off"
-            dir="ltr"
-            value={slug}
-            onChange={(e) => setSlug(e.target.value)}
-            leading={<Building2 className="size-4" />}
-            placeholder={t('workspacePh')}
-          />
           <Input
             label={t('email')}
             name="email"

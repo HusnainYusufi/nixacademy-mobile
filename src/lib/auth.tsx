@@ -21,64 +21,88 @@ export interface AuthUser {
   name?: string;
 }
 
+/** The academy the account resolved to (returned by login/refresh). */
 export interface Workspace {
   tenantId: string;
   slug: string;
   name: string;
 }
 
+/** Shape of /auth/login and /auth/refresh responses. */
+interface SessionResponse {
+  accessToken: string;
+  user: AuthUser;
+  tenant: { id: string; slug: string; name: string };
+}
+
 interface AuthState {
   user: AuthUser | null;
   workspace: Workspace | null;
-  /** Booting: restoring a persisted session. */
   loading: boolean;
-  /** Slug remembered from the last login, to pre-fill the form. */
-  lastSlug: string | null;
-  login: (slug: string, email: string, password: string) => Promise<void>;
+  /** Email remembered from the last login, to pre-fill the form. */
+  lastEmail: string | null;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   isOwner: boolean;
 }
 
 const OWNER_ROLES = new Set(['TENANT_OWNER', 'ADMIN', 'PLATFORM_ADMIN', 'STAFF']);
 const WS_KEY = 'nixacademy.workspace';
-const SLUG_KEY = 'nixacademy.lastSlug';
+const EMAIL_KEY = 'nixacademy.lastEmail';
 
 const Ctx = createContext<AuthState | null>(null);
+
+function applySession(
+  res: SessionResponse,
+  set: {
+    setUser: (u: AuthUser) => void;
+    setWorkspace: (w: Workspace) => void;
+  },
+) {
+  const ws: Workspace = { tenantId: res.tenant.id, slug: res.tenant.slug, name: res.tenant.name };
+  session.setToken(res.accessToken);
+  session.setTenant(res.user.tenantId);
+  set.setWorkspace(ws);
+  set.setUser(res.user);
+  void Preferences.set({ key: WS_KEY, value: JSON.stringify(ws) });
+}
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [workspace, setWorkspace] = useState<Workspace | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastSlug, setLastSlug] = useState<string | null>(null);
+  const [lastEmail, setLastEmail] = useState<string | null>(null);
   const booted = useRef(false);
 
-  // Warm start: restore token + tenant, then refresh to validate and fetch user.
+  // Warm start: refresh resolves the academy from the account (no tenant needed).
   useEffect(() => {
     if (booted.current) return;
     booted.current = true;
     (async () => {
       try {
-        const [{ value: wsRaw }, { value: slug }] = await Promise.all([
+        const [{ value: wsRaw }, { value: email }] = await Promise.all([
           Preferences.get({ key: WS_KEY }),
-          Preferences.get({ key: SLUG_KEY }),
+          Preferences.get({ key: EMAIL_KEY }),
         ]);
-        if (slug) setLastSlug(slug);
-        await session.restoreToken();
-        const ws = wsRaw ? (JSON.parse(wsRaw) as Workspace) : null;
-        if (ws) {
-          session.setTenant(ws.tenantId);
-          setWorkspace(ws);
+        if (email) setLastEmail(email);
+        // Show the cached academy immediately for a smoother splash→app.
+        if (wsRaw) {
           try {
-            const res = await api.post<{ accessToken: string; user: AuthUser }>(
-              '/auth/refresh',
-              undefined,
-              { noRetry: true },
-            );
-            session.setToken(res.accessToken);
-            setUser(res.user);
+            const ws = JSON.parse(wsRaw) as Workspace;
+            setWorkspace(ws);
+            session.setTenant(ws.tenantId);
           } catch {
-            session.setToken(null);
+            /* ignore corrupt cache */
           }
+        }
+        await session.restoreToken();
+        try {
+          const res = await api.post<SessionResponse>('/auth/refresh', undefined, {
+            noRetry: true,
+          });
+          applySession(res, { setUser, setWorkspace });
+        } catch {
+          session.setToken(null);
         }
       } finally {
         setLoading(false);
@@ -86,25 +110,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })();
   }, []);
 
-  const login = useCallback(async (slug: string, email: string, password: string) => {
-    const s = slug.trim().toLowerCase();
-    const ws = await api.get<{ tenantId: string; name: string; slug: string }>(
-      `/onboarding/lookup?slug=${encodeURIComponent(s)}`,
-    );
-    session.setTenant(ws.tenantId);
-    const res = await api.post<{ accessToken: string; user: AuthUser }>('/auth/login', {
+  const login = useCallback(async (email: string, password: string) => {
+    const res = await api.post<SessionResponse>('/auth/login', {
       email: email.trim(),
       password,
     });
-    session.setToken(res.accessToken);
-    const workspaceObj: Workspace = { tenantId: ws.tenantId, slug: ws.slug, name: ws.name };
-    setWorkspace(workspaceObj);
-    setUser(res.user);
-    setLastSlug(ws.slug);
-    await Promise.all([
-      Preferences.set({ key: WS_KEY, value: JSON.stringify(workspaceObj) }),
-      Preferences.set({ key: SLUG_KEY, value: ws.slug }),
-    ]);
+    applySession(res, { setUser, setWorkspace });
+    setLastEmail(email.trim());
+    void Preferences.set({ key: EMAIL_KEY, value: email.trim() });
   }, []);
 
   const logout = useCallback(async () => {
@@ -114,8 +127,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       /* best effort */
     }
     session.setToken(null);
+    session.setTenant(null);
     setUser(null);
-    // Keep workspace + slug so the next login is one tap.
+    // Keep workspace + email so the next login is one tap.
   }, []);
 
   const value = useMemo<AuthState>(
@@ -123,12 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       workspace,
       loading,
-      lastSlug,
+      lastEmail,
       login,
       logout,
       isOwner: !!user?.roles?.some((r) => OWNER_ROLES.has(r)),
     }),
-    [user, workspace, loading, lastSlug, login, logout],
+    [user, workspace, loading, lastEmail, login, logout],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
