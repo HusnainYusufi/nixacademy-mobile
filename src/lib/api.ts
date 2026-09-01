@@ -138,10 +138,11 @@ export const api = {
   del: <T>(path: string, o?: RequestOptions) => request<T>(path, { ...o, method: 'DELETE' }),
 };
 
-/** Turn a stored file key / relative path into an absolute, streamable URL. */
+/** Turn a stored file key into a usable URL. Backend-served files live under the
+ *  API base (e.g. `/api/v1/course-thumbnails/…`); already-absolute URLs pass
+ *  through. In dev the relative base routes the image through the Vite proxy. */
 export function fileUrl(key?: string | null): string {
   if (!key) return '';
   if (/^https?:\/\//.test(key)) return key;
-  const origin = BASE.replace(/\/api\/v1\/?$/, '');
-  return `${origin}/${key.replace(/^\//, '')}`;
+  return `${BASE}${key.startsWith('/') ? key : `/${key}`}`;
 }
