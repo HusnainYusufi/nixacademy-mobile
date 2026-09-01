@@ -37,8 +37,10 @@ export function SettingsRow({
     <>
       <span
         className={cn(
-          'grid size-9 shrink-0 place-items-center rounded-xl',
-          destructive ? 'bg-destructive/12 text-destructive' : 'bg-primary/12 text-primary',
+          'grid size-9 shrink-0 place-items-center rounded-xl ring-1',
+          destructive
+            ? 'bg-destructive/12 text-destructive ring-destructive/15'
+            : 'bg-gradient-to-br from-primary/15 to-primary/5 text-primary ring-primary/10',
         )}
       >
         <Icon className="size-[18px]" strokeWidth={2.1} />

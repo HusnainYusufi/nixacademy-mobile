@@ -5,7 +5,6 @@ import { AnimatePresence, motion, type Variants } from 'motion/react';
 import {
   Bell,
   FileText,
-  Info,
   Languages,
   LifeBuoy,
   LogOut,
@@ -135,7 +134,7 @@ export function ProfileScreen() {
             </SettingsGroup>
           </motion.div>
 
-          {/* Support */}
+          {/* Support & legal */}
           <motion.div variants={item}>
             <SettingsGroup label={t('support')}>
               <SettingsRow
@@ -145,29 +144,8 @@ export function ProfileScreen() {
                 chevron
                 onClick={() => {}}
               />
-            </SettingsGroup>
-          </motion.div>
-
-          {/* Legal */}
-          <motion.div variants={item}>
-            <SettingsGroup label={t('legal')}>
               <SettingsRow icon={FileText} label={t('terms')} chevron onClick={() => {}} />
               <SettingsRow icon={ShieldCheck} label={t('privacy')} chevron onClick={() => {}} />
-            </SettingsGroup>
-          </motion.div>
-
-          {/* About */}
-          <motion.div variants={item}>
-            <SettingsGroup label={t('about')}>
-              <SettingsRow
-                icon={Info}
-                label={t('version')}
-                value={
-                  <span dir="ltr" className="tabular-nums text-muted-foreground">
-                    {APP_VERSION}
-                  </span>
-                }
-              />
             </SettingsGroup>
           </motion.div>
 
@@ -220,6 +198,11 @@ export function ProfileScreen() {
               )}
             </AnimatePresence>
           </motion.div>
+
+          {/* Version footer — native convention, removes a whole thin group */}
+          <motion.p variants={item} className="pb-2 pt-1 text-center text-xs text-muted-foreground">
+            Nix Academy · {APP_VERSION}
+          </motion.p>
         </motion.div>
       </Screen>
     </>

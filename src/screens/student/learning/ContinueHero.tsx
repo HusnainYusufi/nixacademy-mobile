@@ -15,6 +15,7 @@ const strings = {
   start: { en: 'Start learning', ar: 'ابدأ التعلّم' },
   review: { en: 'Review course', ar: 'مراجعة الدورة' },
   count: { en: '{done} / {total} lessons', ar: '{done} / {total} درس' },
+  await: { en: '{n} lessons await you', ar: '{n} درسًا بانتظارك' },
   notStarted: { en: 'Not started yet', ar: 'لم تبدأ بعد' },
   completed: { en: 'Completed', ar: 'مكتملة' },
 };
@@ -82,7 +83,7 @@ export function ContinueHero({
           )}
 
           {/* Legibility scrim */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-transparent" />
 
           {done && (
             <span className="absolute end-3 top-3 inline-flex items-center gap-1 rounded-full bg-success/90 px-2.5 py-1 text-[11px] font-extrabold text-white shadow-card">
@@ -91,8 +92,9 @@ export function ContinueHero({
             </span>
           )}
 
-          {/* Play affordance */}
-          <span className="absolute bottom-3 end-3 grid size-12 place-items-center rounded-full bg-primary text-primary-foreground shadow-glow">
+          {/* Play affordance — a subtle glass accent (the primary CTA is the
+              full-width button below), not a second gold button. */}
+          <span className="absolute bottom-3 end-3 grid size-11 place-items-center rounded-full bg-white/15 text-white ring-1 ring-white/30 backdrop-blur">
             {done ? <RotateCcw className="size-5" /> : <Play className="size-5 fill-current" />}
           </span>
 
@@ -105,9 +107,15 @@ export function ContinueHero({
         <div className="p-4">
           <div className="mb-2 flex items-center justify-between gap-3">
             <span className="text-sm font-bold tabular-nums text-muted-foreground">
-              {total > 0 ? t('count', { done: completed, total }) : t('notStarted')}
+              {pct === 0
+                ? t('await', { n: total })
+                : total > 0
+                  ? t('count', { done: completed, total })
+                  : t('notStarted')}
             </span>
-            <span className="tabular-nums text-sm font-extrabold text-primary">{pct}%</span>
+            {pct > 0 && (
+              <span className="tabular-nums text-sm font-extrabold text-primary">{pct}%</span>
+            )}
           </div>
           <Progress value={pct} className="mb-4 h-2.5" />
           <Button variant="gold" size="lg" className="w-full" onClick={open}>

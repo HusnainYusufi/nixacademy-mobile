@@ -18,7 +18,7 @@ export function SettingsGroup({
   return (
     <section className={className}>
       {label && (
-        <h2 className="mb-2 px-1 text-[0.7rem] font-bold uppercase tracking-wider text-muted-foreground/80">
+        <h2 className="mb-2 px-1 text-[0.72rem] font-bold uppercase tracking-wider text-muted-foreground">
           {label}
         </h2>
       )}

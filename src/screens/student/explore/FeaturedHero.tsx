@@ -49,7 +49,7 @@ export function FeaturedHero({ c }: { c: Listing }) {
             </div>
           )}
           {/* Bottom scrim so overlaid text stays legible in both themes */}
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/55 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-transparent" />
         </div>
 
         {/* Top badges */}

@@ -52,7 +52,7 @@ export function CategoryChips({
               onSelect(value);
             }}
             className={cn(
-              'press h-9 shrink-0 whitespace-nowrap rounded-full border px-4 text-xs font-bold transition-colors',
+              'press h-10 shrink-0 whitespace-nowrap rounded-full border px-4 text-[13px] font-bold transition-colors',
               active
                 ? 'border-transparent bg-primary text-primary-foreground shadow-glow'
                 : 'border-border/70 bg-card/60 text-muted-foreground hover:text-foreground',

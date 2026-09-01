@@ -45,7 +45,7 @@ export function ProfileHeader({
             <div className="min-w-0 flex-1">
               <h2 className="truncate text-lg font-extrabold leading-tight">{name}</h2>
               {email && (
-                <p dir="ltr" className="mt-0.5 truncate text-start text-sm text-muted-foreground">
+                <p dir="ltr" className="mt-0.5 truncate text-end text-sm text-muted-foreground">
                   {email}
                 </p>
               )}

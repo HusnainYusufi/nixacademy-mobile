@@ -19,6 +19,7 @@ const strings = {
   headline: { en: 'What will you master today?', ar: 'ماذا ستتقن اليوم؟' },
   searchPh: { en: 'Search courses…', ar: 'ابحث عن الدورات…' },
   results: { en: '{n} courses', ar: '{n} دورة' },
+  sectionTitle: { en: 'All courses', ar: 'كل الدورات' },
   emptyTitle: { en: 'No courses found', ar: 'لا توجد دورات' },
   emptyHint: { en: 'Try a different search or category.', ar: 'جرّب بحثًا أو فئة مختلفة.' },
   clear: { en: 'Clear filters', ar: 'مسح عوامل التصفية' },
@@ -72,11 +73,11 @@ export function ExploreScreen() {
       <header className="glass sticky top-0 z-30 border-b border-border/60 pt-safe">
         <div className="px-4 pb-3 pt-3">
           <div className="mb-3 flex items-center justify-between">
-            <div>
-              <p className="text-xs font-bold uppercase tracking-wide text-primary">{t('hi')}</p>
-              <h1 className="text-lg font-extrabold leading-tight">{t('headline')}</h1>
+            <div className="min-w-0">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('hi')}</p>
+              <h1 className="text-2xl font-extrabold leading-[1.15]">{t('headline')}</h1>
             </div>
-            <div className="grid size-10 place-items-center rounded-2xl border border-primary/20 bg-card/70">
+            <div className="grid size-10 shrink-0 place-items-center rounded-2xl bg-card/70 ring-1 ring-primary/30 shadow-glow">
               <LogoMark className="size-6" />
             </div>
           </div>
@@ -154,27 +155,36 @@ export function ExploreScreen() {
         ) : (
           <div className="mt-4 space-y-4">
             {hero && <FeaturedHero c={hero} />}
-            <motion.div
-              className={cn('grid grid-cols-2 gap-3')}
-              initial="hidden"
-              animate="show"
-              variants={{ show: { transition: { staggerChildren: 0.05 } } }}
-            >
-              {grid.map((c) => (
+            {grid.length > 0 && (
+              <>
+                <div className="flex items-baseline justify-between gap-3">
+                  <h2 className="text-base font-extrabold">
+                    {cat === 'all' ? t('sectionTitle') : cat}
+                  </h2>
+                  <span className="text-xs font-semibold text-muted-foreground">
+                    {t('results', { n: filtered.length })}
+                  </span>
+                </div>
                 <motion.div
-                  key={c.courseId}
-                  variants={{
-                    hidden: { opacity: 0, y: 16 },
-                    show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
-                  }}
+                  className={cn('grid grid-cols-2 gap-3')}
+                  initial="hidden"
+                  animate="show"
+                  variants={{ show: { transition: { staggerChildren: 0.05 } } }}
                 >
-                  <CourseCard c={c} />
+                  {grid.map((c) => (
+                    <motion.div
+                      key={c.courseId}
+                      variants={{
+                        hidden: { opacity: 0, y: 16 },
+                        show: { opacity: 1, y: 0, transition: { duration: 0.4, ease: [0.16, 1, 0.3, 1] } },
+                      }}
+                    >
+                      <CourseCard c={c} />
+                    </motion.div>
+                  ))}
                 </motion.div>
-              ))}
-            </motion.div>
-            <p className="pb-2 pt-1 text-center text-xs font-medium text-muted-foreground">
-              {t('results', { n: filtered.length })}
-            </p>
+              </>
+            )}
           </div>
         )}
       </Screen>
